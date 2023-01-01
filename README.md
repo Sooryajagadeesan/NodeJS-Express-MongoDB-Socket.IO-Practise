@@ -1,3 +1,3 @@
-# NodeJS + Express + MongoDB -Practise
+# NodeJS + Express + MongoDB + Socket.IO -Practise
 
-NodeJS + Express + MongoDB learnings
+NodeJS + Express + MongoDB + Socket.IO learnings
