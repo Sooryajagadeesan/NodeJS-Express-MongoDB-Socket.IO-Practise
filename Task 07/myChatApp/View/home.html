@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Chat App. v01</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        .container {
+            width: 100%;
+            height: 100vh;
+            background-color: cadetblue;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        .section {
+            width: 40%;
+            margin: auto;
+            background-color: red;
+        }
+        .section form {
+            padding: 10px 20px;
+            background-color: white;
+        }
+        .heading {
+            text-align: center;
+        }
+        #username {
+            width: 80%;
+            font-size: 30px;
+        }
+        .submit-btn {
+            display: block;
+            width: 50%;
+            font-size: 18px;
+            border-radius: 10px;
+            border: none;
+            background-color: purple;
+            color: #fff;
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="heading">My First Chat App</h1>
+
+        <section class="section">
+            <form action="http://localhost:3000/join-chat" id="username-form">
+                <h2>Enter your name to join the chat,</h2>
+                <input type="text" id="username" placeholder="name" name ="username" autocomplete="off" required>
+                <input type="submit" value="Go To Chat" class="submit-btn">
+            </form>
+        </section>
+
+    </div>
+
+    <script>
+        const userNameForm = document.querySelector("#username-form");
+        const userNameField = document.querySelector("#username");
+        userNameForm.addEventListener("submit",(event) => {
+            const enteredName = userNameField.value.trim();
+
+            if(!enteredName) {
+                event.preventDefault();
+            }
+        })
+    </script>
+</body>
+</html>

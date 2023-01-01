@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            /* background-color: red; */
+            border: 2px solid #ccc;
+            height: 100vh;
+        }
+        .heading {
+            text-align: center;
+        }
+   
+        #message-container {
+            /* background-color: purple; */
+            padding: 10px 20px;
+            list-style-type: none;
+            margin-top: 5%;
+            width: 100%;
+        }
+        #message-container li {
+            /* border: 1px solid goldenrod; */
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            background-color: red;
+            display: inline;
+        }
+        #message-form {
+            position: fixed;
+            bottom: 0;
+            width: 50%;
+            margin: auto;
+        }
+        .field {
+            background-color: aqua;
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            height: 40px;
+        }
+        #input-box {
+            width: 90%;
+            font-size: 30px;
+        }
+        #input-box:focus {
+            outline: none;
+        }
+        #submit-btn {
+            width: 10%;
+        }
+        .message {
+            background-color: aquamarine;
+            padding: 5px 20px;
+          
+        }
+        .border-radius-right {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .border-radius-left {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        .margin-btm-15 {
+            margin-bottom: 15px;
+        }
+        .align-right {
+            text-align: right;
+        }
+        .name-label {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .user-info {
+            position: absolute;
+            right: 10px;
+            top: 20px;
+            border: 2px solid black;
+            padding: 10px 20px;
+            width: 20%;
+        }
+        #user {
+            border: 1px solid;
+            text-align: center;
+        }
+        .users-online {
+            /* padding: 10px 10px 10px 20px; */
+            list-style-position: inside;
+        }
+        .notification-bar {
+            position: absolute;
+            left: 10px;
+            top: 20px;
+            width: 20%;
+            border: 2px solid;
+            padding: 10px 20px;
+        }
+      
+    </style>
+</head>
+<body>
+    <div class="user-info">
+        <h2 id="user"></h2>
+        <br>
+        <h3>Users Online</h3>
+        <!-- list to store available user names -->
+        <ol class="users-online"></ol>
+    </div>
+    <div class="notification-bar">
+        <h2>Notifications</h2>
+    </div>
+    <div class="container">
+        <h1 class="heading">My First Chat App.</h1>
+        <!-- container for displaying all the messages -->
+        <div id="message-container"></div>
+        <!-- form to post an input message -->
+        <form action="" id="message-form">
+            <div class="field">
+                <input type="text" id="input-box" autocomplete="off">
+                <input type="submit" id="submit-btn" value="Send">
+            </div>
+        </form>
+
+    </div>
+
+    <!-- CDN for client side Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        // let socket =  io({transports: ['websocket'], upgrade: false});
+        let form = document.querySelector("#message-form");
+        let input = document.querySelector("#input-box");
+
+    
+        let messageContainer = document.querySelector("#message-container");
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const enteredMessage = input.value.trim();
+            if(enteredMessage) {
+                                
+                socket.emit("chat message",{
+                    enteredMessage
+                    });
+                input.value = '';
+            }
+        })
+        
+        // to update the html on the chat event
+        socket.on("chat message",(messageObj) => {
+            const userId = socket.id;
+            let {message, id, name} = messageObj;
+            // sessionStorage.setItem("username",name);
+
+            // creating the elements
+            let newMessageContainer = document.createElement("div");
+            let newMessage = document.createElement("span");
+            let nameElement = document.createElement("p");
+            // assigning class names
+            newMessageContainer.className = "margin-btm-15";
+            newMessage.className = "message";
+            nameElement.className = "name-label";
+            // adding the text content
+            newMessage.textContent = ''+message;
+            nameElement.textContent = ''+name;
+
+            // if the message is from the same socket put the message to the right
+            if(id === userId) {
+                newMessage.classList.add("border-radius-left");
+                newMessageContainer.classList.add("align-right");
+            }else {
+                newMessage.classList.add("border-radius-right");
+                newMessageContainer.appendChild(nameElement)
+            }
+            // appending new message to the view
+            newMessageContainer.appendChild(newMessage);
+            messageContainer.appendChild(newMessageContainer);
+            window.scrollTo(0, document.body.scrollHeight);
+        })
+    
+        // display all available users online
+        socket.on("display-users",(users) => {
+            const nameList = document.querySelector(".users-online");
+            nameList.innerHTML = '';
+            let areUsersThere = false;
+            for(let user of users.connectedUsers) {
+                if(socket.id != user.id) {
+                    let newUser = document.createElement("li");
+                    newUser.textContent = user.name;
+                    nameList.appendChild(newUser);
+                    areUsersThere = true;
+                } else {
+                    document.querySelector("#user").textContent = user.name;
+                }
+            }
+            if(areUsersThere === false) {
+                console.log("here")
+                nameList.innerHTML = "No other users Except you."
+            }
+        })
+
+        // notify other user connections
+        socket.on("notify-connections",(user) => {
+            let notificationContainer = document.querySelector(".notification-bar");
+            let interval = 5000;
+            if(socket.id !== user.id) {
+                let notification = document.createElement('p');
+                notification.classList.add("message","margin-btm-15","border-radius-right");
+                notification.textContent = user.name + " connected";
+                notificationContainer.appendChild(notification);
+                setTimeout(()=> {
+                        notification.remove();
+                    },interval);
+            }
+        })
+
+        // notify other user disconnections
+        socket.on("notify-disconnections",(user) => {
+            let notificationContainer = document.querySelector(".notification-bar");
+            let interval = 5000;
+            if(socket.id !== user.id) {
+                let notification = document.createElement('p');
+                notification.classList.add("message","margin-btm-15","border-radius-right");
+                notification.style.backgroundColor = "pink";
+                notification.textContent = user.name + " disconnected";
+                notificationContainer.appendChild(notification);
+
+                setTimeout(()=> {
+                    notification.remove();
+                },interval);
+            }
+        })
+    </script>
+</body>
+</html>

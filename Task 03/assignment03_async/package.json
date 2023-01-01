@@ -1,0 +1,15 @@
+{
+  "name": "assignment03_async",
+  "version": "1.0.0",
+  "description": "async module",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Soorya",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.3"
+  }
+}
